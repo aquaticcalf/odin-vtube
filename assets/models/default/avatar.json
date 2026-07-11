@@ -1,0 +1,81 @@
+{
+  "name": "Default Procedural",
+  "pos_x": 0,
+  "pos_y": 40,
+  "scale": 1.0,
+  "image": "",
+  "layers": [
+    {
+      "name": "body",
+      "kind": "body",
+      "oy": 120,
+      "rot_z_param": "ParamBodyAngleZ",
+      "rot_z_scale": 0.4,
+      "pos_x_param": "ParamBodyAngleX",
+      "pos_x_scale": 1.2,
+      "tint": [255, 255, 255, 255]
+    },
+    {
+      "name": "head",
+      "kind": "head",
+      "oy": -20,
+      "rot_z_param": "ParamAngleZ",
+      "rot_z_scale": 1.0,
+      "pos_x_param": "ParamAngleX",
+      "pos_x_scale": 2.5,
+      "pos_y_param": "ParamAngleY",
+      "pos_y_scale": -2.0,
+      "tint": [255, 224, 196, 255]
+    },
+    {
+      "name": "hair",
+      "kind": "hair",
+      "oy": -90,
+      "rot_z_param": "ParamAngleZ",
+      "rot_z_scale": 1.2,
+      "pos_x_param": "ParamAngleX",
+      "pos_x_scale": 3.0,
+      "tint": [90, 60, 140, 255]
+    },
+    {
+      "name": "brow_l",
+      "kind": "brow_l",
+      "ox": -38,
+      "oy": -55,
+      "tint": [60, 40, 30, 255]
+    },
+    {
+      "name": "brow_r",
+      "kind": "brow_r",
+      "ox": 38,
+      "oy": -55,
+      "tint": [60, 40, 30, 255]
+    },
+    {
+      "name": "eye_l",
+      "kind": "eye_l",
+      "ox": -36,
+      "oy": -20,
+      "tint": [255, 255, 255, 255]
+    },
+    {
+      "name": "eye_r",
+      "kind": "eye_r",
+      "ox": 36,
+      "oy": -20,
+      "tint": [255, 255, 255, 255]
+    },
+    {
+      "name": "mouth",
+      "kind": "mouth",
+      "oy": 40,
+      "tint": [200, 80, 100, 255]
+    },
+    {
+      "name": "blush",
+      "kind": "blush",
+      "oy": 15,
+      "tint": [255, 120, 140, 180]
+    }
+  ]
+}

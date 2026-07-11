@@ -1,0 +1,12 @@
+# Personal face distillation — Colab / local
+# Install: pip install -r requirements.txt
+
+torch>=2.1.0
+torchvision>=0.16.0
+numpy>=1.24
+opencv-python-headless>=4.8
+mediapipe>=0.10.9
+onnx>=1.15
+onnxruntime>=1.16
+tqdm>=4.66
+Pillow>=10.0
