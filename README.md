@@ -187,5 +187,6 @@ odin-vtube/
 
 ## License
 
-Unless otherwise noted, code in this repository is provided for you to use and modify for your own projects.  
+This project is licensed under the [MIT License](LICENSE).
+
 Third-party libraries (raylib, MediaPipe, OpenCV, Live2D Cubism if added later, etc.) keep their own licenses.
