@@ -3,21 +3,15 @@ package main
 import "core:fmt"
 import "core:mem"
 import "core:os"
-import "core:path/filepath"
 import "core:strings"
 import rl "vendor:raylib"
 
 /*
-	OdinVTube — clean-room local VTuber avatar app.
+	OdinVTube — local avatar runtime + model editor + OBS mode.
 
-	Inspired by public VTube Studio concepts (parameter names, mapping ranges,
-	local plugin API message types) but 100% original code. No Steam, no
-	telemetry, no watermark, no network except optional localhost plugin API.
-
-	Build (from this folder):
-	  odin build . -out:odin-vtube.exe -collection:shared=./
-
-	Or use build.bat
+	Build:
+	  odin build . -out:odin-vtube.exe
+	  build.bat
 */
 
 main :: proc() {
@@ -33,7 +27,6 @@ main :: proc() {
 		}
 	}
 
-	// Prefer config next to cwd
 	cfg_path := "configs/default.json"
 	if !os.exists(cfg_path) {
 		_ = os.make_directory("configs")
@@ -45,9 +38,8 @@ main :: proc() {
 	rl.InitWindow(cfg.window_width, cfg.window_height, strings.clone_to_cstring(cfg.window_title, context.temp_allocator))
 	defer rl.CloseWindow()
 	rl.SetTargetFPS(cfg.target_fps)
-	rl.SetExitKey(rl.KeyboardKey(0)) // we handle Esc ourselves
+	rl.SetExitKey(rl.KeyboardKey(0))
 
-	// Systems
 	tracker := tracker_init(cfg.tracking_mode)
 	defer tracker_destroy(&tracker)
 
@@ -67,6 +59,11 @@ main :: proc() {
 
 	avatar := load_avatar(cfg.model_path)
 	defer avatar_destroy(&avatar)
+
+	editor := editor_init(cfg.model_path)
+	defer editor_destroy(&editor)
+
+	obs := obs_mode_init()
 
 	bg_tex: rl.Texture2D
 	has_bg := false
@@ -88,12 +85,12 @@ main :: proc() {
 	running := true
 
 	fmt.println("========================================")
-	fmt.println(" OdinVTube — fully local VTuber runtime")
-	fmt.println(" No Steam · No cloud · No watermark")
+	fmt.println(" OdinVTube")
+	fmt.println(" F5 model editor · F9 OBS mode")
 	fmt.println("========================================")
 	fmt.println("Model:", avatar.def.name)
 	if api != nil && api.enabled {
-		fmt.println("Plugin API: 127.0.0.1:", cfg.api_port, "(TCP JSON lines)")
+		fmt.println("Plugin API: 127.0.0.1:", cfg.api_port)
 	}
 
 	for running && !rl.WindowShouldClose() {
@@ -102,7 +99,6 @@ main :: proc() {
 		win_w := rl.GetScreenWidth()
 		win_h := rl.GetScreenHeight()
 
-		// Hotkeys
 		hotkeys_update(&hot)
 		for action in hot.fired {
 			switch action {
@@ -110,32 +106,38 @@ main :: proc() {
 				show_hud = !show_hud
 			case .Tracking_Mouse:
 				tracker_set_mode(&tracker, .Mouse)
-				fmt.println("[track] mouse")
 			case .Tracking_Idle:
 				tracker_set_mode(&tracker, .Idle)
-				fmt.println("[track] idle")
 			case .Tracking_Demo:
 				tracker_set_mode(&tracker, .Demo)
-				fmt.println("[track] demo")
 			case .Expr_Happy:
-				expressions_toggle(&exprs, "happy")
+				if !editor.active do expressions_toggle(&exprs, "happy")
 			case .Expr_Angry:
-				expressions_toggle(&exprs, "angry")
+				if !editor.active do expressions_toggle(&exprs, "angry")
 			case .Expr_Sad:
-				expressions_toggle(&exprs, "sad")
+				if !editor.active do expressions_toggle(&exprs, "sad")
 			case .Expr_Shock:
-				expressions_toggle(&exprs, "shock")
+				if !editor.active do expressions_toggle(&exprs, "shock")
 			case .Expr_Clear:
-				expressions_set(&exprs, "happy", false)
-				expressions_set(&exprs, "angry", false)
-				expressions_set(&exprs, "sad", false)
-				expressions_set(&exprs, "shock", false)
+				if !editor.active {
+					expressions_set(&exprs, "happy", false)
+					expressions_set(&exprs, "angry", false)
+					expressions_set(&exprs, "sad", false)
+					expressions_set(&exprs, "shock", false)
+				}
 			case .Physics_Toggle:
 				phys.enabled = !phys.enabled
-				fmt.println("[phys]", phys.enabled)
 			case .Chroma_Toggle:
-				chroma = !chroma
-				fmt.println("[chroma]", chroma)
+				if !obs.active do chroma = !chroma
+			case .Toggle_Editor:
+				// leave OBS if entering editor
+				if !editor.active && obs.active {
+					obs_mode_toggle(&obs, &chroma, &show_hud)
+				}
+				editor_toggle(&editor)
+			case .Toggle_OBS:
+				if editor.active do editor_toggle(&editor)
+				obs_mode_toggle(&obs, &chroma, &show_hud)
 			case .Reset_Pose:
 				tracker.state.FaceAngleX = 0
 				tracker.state.FaceAngleY = 0
@@ -143,27 +145,35 @@ main :: proc() {
 				tracker.state.MouthOpen = 0
 				tracker.state.MouthSmile = 0
 			case .Quit:
-				running = false
+				if editor.active {
+					editor_toggle(&editor)
+				} else if obs.active {
+					obs_mode_toggle(&obs, &chroma, &show_hud)
+				} else {
+					running = false
+				}
 			case .None, .Toggle_API_Info:
 			}
 		}
 
-		// Zoom with mouse wheel
-		wheel := rl.GetMouseWheelMove()
-		if wheel != 0 {
-			user_scale = clamp(user_scale + wheel * 0.05, 0.3, 3.0)
+		// Zoom (not when over editor panel)
+		if !editor.active || rl.GetMouseX() < win_w - i32(editor.panel_w) {
+			wheel := rl.GetMouseWheelMove()
+			if wheel != 0 {
+				user_scale = clamp(user_scale + wheel * 0.05, 0.3, 3.0)
+			}
 		}
 
-		// Tracking → mappings → expressions → physics
 		tracker_update(&tracker, dt, win_w, win_h)
 
-		// Plugin injects into tracking/params
 		if api != nil {
 			api_apply_injects(api, &tracker.state, &model)
 		}
 
 		apply_mappings(rules[:], tracker.state, &model, dt)
-		expressions_update(&exprs, &model, dt)
+		if !editor.active {
+			expressions_update(&exprs, &model, dt)
+		}
 
 		ax := get_param(model, "ParamAngleX")
 		ay := get_param(model, "ParamAngleY")
@@ -174,18 +184,19 @@ main :: proc() {
 			api_sync_from_app(api, tracker.state, model, avatar.def.name)
 		}
 
-		// Draw
+		// Background
 		bg: rl.Color
-		if chroma {
-			bg = rl.Color{cfg.chroma_color[0], cfg.chroma_color[1], cfg.chroma_color[2], cfg.chroma_color[3]}
+		if chroma || obs.active {
+			kc := obs.active ? obs.key_color : cfg.chroma_color
+			bg = rl.Color{kc[0], kc[1], kc[2], kc[3]}
 		} else {
 			bg = rl.Color{cfg.bg_color[0], cfg.bg_color[1], cfg.bg_color[2], cfg.bg_color[3]}
 		}
+
 		rl.BeginDrawing()
 		rl.ClearBackground(bg)
 
-		if has_bg && !chroma {
-			// cover
+		if has_bg && !chroma && !obs.active {
 			src := rl.Rectangle{0, 0, f32(bg_tex.width), f32(bg_tex.height)}
 			dst := rl.Rectangle{0, 0, f32(win_w), f32(win_h)}
 			rl.DrawTexturePro(bg_tex, src, dst, {0, 0}, 0, rl.WHITE)
@@ -193,18 +204,25 @@ main :: proc() {
 
 		avatar_draw(avatar, model, phys, win_w, win_h, user_scale)
 
-		hud_draw(
-			show_hud,
-			cfg,
-			tracker.state,
-			model,
-			tracker.mode,
-			phys.enabled,
-			cfg.api_port,
-			api != nil && api.enabled,
-			avatar.def.name,
-			f32(rl.GetFPS()),
-		)
+		if editor.active {
+			editor_update_draw(&editor, &avatar, model, phys, win_w, win_h, user_scale, dt)
+		} else {
+			if show_hud {
+				hud_draw(
+					true,
+					cfg,
+					tracker.state,
+					model,
+					tracker.mode,
+					phys.enabled,
+					cfg.api_port,
+					api != nil && api.enabled,
+					avatar.def.name,
+					f32(rl.GetFPS()),
+				)
+			}
+			obs_mode_draw_hint(obs, win_w, win_h)
+		}
 
 		rl.EndDrawing()
 	}

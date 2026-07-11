@@ -8,9 +8,14 @@ import "core:path/filepath"
 import "core:strings"
 import rl "vendor:raylib"
 
-// OdinVTube avatar format — layered 2D, parameter-driven.
-// Not Live2D moc3 (that needs Cubism SDK). This is our clean-room format
-// that gives the same *feel* for streaming: head angles, eyes, mouth, physics.
+// OdinVTube Model format (.ovt.json / avatar.json) — free, layered 2D.
+// Make models in the in-app editor (F5). No Live2D Cubism SDK required.
+
+// clone helper for owned layer strings
+av_str :: proc(s: string) -> string {
+	if s == "" do return ""
+	return strings.clone(s)
+}
 
 Avatar_Layer :: struct {
 	name:     string,
@@ -54,23 +59,52 @@ Avatar :: struct {
 	has_billboard: bool,
 }
 
+make_layer :: proc(
+	name, kind: string,
+	ox: f32 = 0, oy: f32 = 0,
+	tint: [4]u8 = {255, 255, 255, 255},
+	rot_z_param: string = "",
+	rot_z_scale: f32 = 1,
+	pos_x_param: string = "",
+	pos_x_scale: f32 = 0,
+	pos_y_param: string = "",
+	pos_y_scale: f32 = 0,
+) -> Avatar_Layer {
+	return Avatar_Layer{
+		name         = av_str(name),
+		kind         = av_str(kind),
+		texture      = "",
+		ox           = ox,
+		oy           = oy,
+		tint         = tint,
+		rot_z_param  = av_str(rot_z_param),
+		rot_z_scale  = rot_z_scale,
+		pos_x_param  = av_str(pos_x_param),
+		pos_x_scale  = pos_x_scale,
+		pos_y_param  = av_str(pos_y_param),
+		pos_y_scale  = pos_y_scale,
+		scale_param  = "",
+		visible_param = "",
+	}
+}
+
 avatar_default_procedural :: proc() -> Avatar {
 	a: Avatar
-	a.def.name = "Default Procedural"
+	a.def.name = av_str("Default Procedural")
 	a.def.pos_x = 0
 	a.def.pos_y = 40
 	a.def.scale = 1
 	a.def.layers = make([dynamic]Avatar_Layer)
 
-	append(&a.def.layers, Avatar_Layer{name = "body", kind = "body", oy = 120, tint = {255, 255, 255, 255}, rot_z_param = "ParamBodyAngleZ", rot_z_scale = 0.4, pos_x_param = "ParamBodyAngleX", pos_x_scale = 1.2})
-	append(&a.def.layers, Avatar_Layer{name = "head", kind = "head", oy = -20, tint = {255, 224, 196, 255}, rot_z_param = "ParamAngleZ", rot_z_scale = 1, pos_x_param = "ParamAngleX", pos_x_scale = 2.5, pos_y_param = "ParamAngleY", pos_y_scale = -2.0})
-	append(&a.def.layers, Avatar_Layer{name = "hair", kind = "hair", oy = -90, tint = {90, 60, 140, 255}, rot_z_param = "ParamAngleZ", rot_z_scale = 1.2, pos_x_param = "ParamAngleX", pos_x_scale = 3})
-	append(&a.def.layers, Avatar_Layer{name = "brow_l", kind = "brow_l", ox = -38, oy = -55, tint = {60, 40, 30, 255}})
-	append(&a.def.layers, Avatar_Layer{name = "brow_r", kind = "brow_r", ox = 38, oy = -55, tint = {60, 40, 30, 255}})
-	append(&a.def.layers, Avatar_Layer{name = "eye_l", kind = "eye_l", ox = -36, oy = -20, tint = {255, 255, 255, 255}})
-	append(&a.def.layers, Avatar_Layer{name = "eye_r", kind = "eye_r", ox = 36, oy = -20, tint = {255, 255, 255, 255}})
-	append(&a.def.layers, Avatar_Layer{name = "mouth", kind = "mouth", oy = 40, tint = {200, 80, 100, 255}})
-	append(&a.def.layers, Avatar_Layer{name = "blush", kind = "blush", oy = 15, tint = {255, 120, 140, 180}})
+	append(&a.def.layers, make_layer("body", "body", 0, 120, {255, 255, 255, 255}, "ParamBodyAngleZ", 0.4, "ParamBodyAngleX", 1.2))
+	append(&a.def.layers, make_layer("head", "head", 0, -20, {255, 224, 196, 255}, "ParamAngleZ", 1, "ParamAngleX", 2.5, "ParamAngleY", -2))
+	append(&a.def.layers, make_layer("hair", "hair", 0, -90, {90, 60, 140, 255}, "ParamAngleZ", 1.2, "ParamAngleX", 3))
+	append(&a.def.layers, make_layer("brow_l", "brow_l", -38, -55, {60, 40, 30, 255}))
+	append(&a.def.layers, make_layer("brow_r", "brow_r", 38, -55, {60, 40, 30, 255}))
+	append(&a.def.layers, make_layer("eye_l", "eye_l", -36, -20, {255, 255, 255, 255}))
+	append(&a.def.layers, make_layer("eye_r", "eye_r", 36, -20, {255, 255, 255, 255}))
+	append(&a.def.layers, make_layer("mouth", "mouth", 0, 40, {200, 80, 100, 255}))
+	append(&a.def.layers, make_layer("blush", "blush", 0, 15, {255, 120, 140, 180}))
 	a.loaded = true
 	return a
 }
@@ -121,7 +155,7 @@ load_avatar :: proc(path: string) -> Avatar {
 	}
 
 	a: Avatar
-	a.def.name = file.name != "" ? file.name : "Loaded"
+	a.def.name = av_str(file.name != "" ? file.name : "Loaded")
 	a.def.pos_x = file.pos_x
 	a.def.pos_y = file.pos_y
 	a.def.scale = file.scale != 0 ? file.scale : 1
@@ -189,6 +223,25 @@ load_avatar :: proc(path: string) -> Avatar {
 	return a
 }
 
+avatar_layer_free_strings :: proc(layer: ^Avatar_Layer) {
+	delete(layer.name)
+	delete(layer.texture)
+	delete(layer.kind)
+	delete(layer.rot_z_param)
+	delete(layer.pos_x_param)
+	delete(layer.pos_y_param)
+	delete(layer.scale_param)
+	delete(layer.visible_param)
+	layer.name = ""
+	layer.texture = ""
+	layer.kind = ""
+	layer.rot_z_param = ""
+	layer.pos_x_param = ""
+	layer.pos_y_param = ""
+	layer.scale_param = ""
+	layer.visible_param = ""
+}
+
 avatar_destroy :: proc(a: ^Avatar) {
 	if a.has_billboard {
 		rl.UnloadTexture(a.billboard)
@@ -198,17 +251,77 @@ avatar_destroy :: proc(a: ^Avatar) {
 		if layer.has_tex {
 			rl.UnloadTexture(layer.tex)
 		}
-		delete(layer.name)
-		delete(layer.texture)
-		delete(layer.kind)
-		delete(layer.rot_z_param)
-		delete(layer.pos_x_param)
-		delete(layer.pos_y_param)
-		delete(layer.scale_param)
-		delete(layer.visible_param)
+		avatar_layer_free_strings(&layer)
 	}
 	delete(a.def.layers)
+	delete(a.def.name)
+	a.def.name = ""
 	a.loaded = false
+}
+
+// Save model to OdinVTube JSON format (free, open, no Cubism).
+save_avatar :: proc(a: Avatar, path: string) -> bool {
+	file: Avatar_File
+	file.name = a.def.name
+	file.pos_x = a.def.pos_x
+	file.pos_y = a.def.pos_y
+	file.scale = a.def.scale
+	file.image = ""
+	file.layers = make([]Avatar_Layer_File, len(a.def.layers))
+	defer delete(file.layers)
+
+	for layer, i in a.def.layers {
+		file.layers[i] = Avatar_Layer_File{
+			name          = layer.name,
+			texture       = layer.texture,
+			kind          = layer.kind,
+			ox            = layer.ox,
+			oy            = layer.oy,
+			w             = layer.w,
+			h             = layer.h,
+			rot_z_param   = layer.rot_z_param,
+			rot_z_scale   = layer.rot_z_scale,
+			pos_x_param   = layer.pos_x_param,
+			pos_x_scale   = layer.pos_x_scale,
+			pos_y_param   = layer.pos_y_param,
+			pos_y_scale   = layer.pos_y_scale,
+			scale_param   = layer.scale_param,
+			scale_amount  = layer.scale_amount,
+			visible_param = layer.visible_param,
+			tint          = layer.tint,
+		}
+	}
+
+	data, err := json.marshal(file, {pretty = true})
+	if err != nil {
+		fmt.println("[avatar] save marshal error:", err)
+		return false
+	}
+	defer delete(data)
+
+	// ensure parent dir
+	dir := filepath.dir(path)
+	if dir != "" && dir != "." {
+		_ = os.make_directory(dir)
+	}
+
+	werr := os.write_entire_file(path, data)
+	if werr != nil {
+		fmt.println("[avatar] save write failed:", path, werr)
+		return false
+	}
+	fmt.println("[avatar] saved", path)
+	return true
+}
+
+// Layer hit-test helper for editor (screen space center of layer)
+avatar_layer_screen_pos :: proc(a: Avatar, layer_i: int, win_w, win_h: i32, user_scale: f32) -> (x, y: f32, ok: bool) {
+	if layer_i < 0 || layer_i >= len(a.def.layers) do return 0, 0, false
+	layer := a.def.layers[layer_i]
+	cx := f32(win_w) * 0.5 + a.def.pos_x
+	cy := f32(win_h) * 0.5 + a.def.pos_y
+	sc := a.def.scale * user_scale
+	return cx + layer.ox * sc, cy + layer.oy * sc, true
 }
 
 avatar_draw :: proc(a: Avatar, params: Model_Params, phys: Physics_State, win_w, win_h: i32, user_scale: f32) {

@@ -37,6 +37,8 @@ It is intentionally minimal. Full Live2D Cubism mesh support is not included yet
 | Avatar JSON + optional billboard image | Supported |
 | Secondary motion (springs) | Supported |
 | Expressions and hotkeys | Supported |
+| OBS mode (F9, borderless + green key) | Supported — see [`docs/OBS.md`](docs/OBS.md) |
+| In-app model editor (F5) | Supported — free `.ovt.json` format |
 | OBS-friendly chroma background | Supported |
 | Localhost plugin API | Supported |
 | Personal face ONNX training (Colab) | Supported (see `personal_face/`) |
@@ -84,10 +86,13 @@ odin-vtube.exe
 | 0 | Clear expressions |
 | F1 | Toggle HUD |
 | F2 / F3 / F4 | Mouse / idle / demo tracking |
+| **F5** | **Model editor** |
+| **F9** | **OBS capture mode** |
 | P | Toggle physics |
-| Ctrl+C | Chroma key background |
+| Ctrl+C | Chroma key (when not in OBS mode) |
+| Ctrl+S | Save model (in editor) |
 | Ctrl+R | Reset pose |
-| Esc | Quit |
+| Esc | Leave editor/OBS, or quit |
 
 ---
 
@@ -106,13 +111,31 @@ Edit `configs/default.json`:
 
 ---
 
-## Avatar format
+## Avatar format (free — no Cubism)
 
-See `assets/models/default/avatar.json`.
+OdinVTube uses its **own layered JSON format** (e.g. `assets/models/default/avatar.json`).  
+No Live2D Cubism SDK and **no paid license** for the format itself.
+
+### Model editor (F5)
+
+1. Run the app, press **F5**  
+2. **Add part** buttons (head, eyes, mouth, hair, …)  
+3. **Drag** the blue handle or use arrow keys  
+4. **Bind head / body** motion presets  
+5. **Ctrl+S** or **Save model**  
+6. **F5** again to return to stream view  
+
+### Format sketch
 
 - Procedural layer kinds: `head`, `body`, `hair`, `eye_l`, `eye_r`, `mouth`, `brow_l`, `brow_r`, `blush`
 - Optional `image` for a full-character PNG
-- Layers can bind to parameters such as `ParamAngleX`, `ParamMouthOpenY`, and similar names used widely in Live2D-style rigs
+- Layers bind to params like `ParamAngleX`, `ParamMouthOpenY`, etc.
+
+## OBS (out of the box)
+
+Press **F9**, then in OBS: **Window Capture** → window **OdinVTube OBS** → filter **Chroma Key (Green)**.
+
+Full steps: [`docs/OBS.md`](docs/OBS.md).
 
 ---
 

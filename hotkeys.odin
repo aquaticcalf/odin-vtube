@@ -17,6 +17,8 @@ Hotkey_Action :: enum {
 	Reset_Pose,
 	Physics_Toggle,
 	Chroma_Toggle,
+	Toggle_Editor,
+	Toggle_OBS,
 	Quit,
 }
 
@@ -71,20 +73,28 @@ hotkeys_update :: proc(h: ^Hotkey_System) {
 	if rl.IsKeyPressed(.R) && rl.IsKeyDown(.LEFT_CONTROL) {
 		append(&h.fired, Hotkey_Action.Reset_Pose)
 	}
+	if rl.IsKeyPressed(.F5) {
+		append(&h.fired, Hotkey_Action.Toggle_Editor)
+	}
+	if rl.IsKeyPressed(.F9) {
+		append(&h.fired, Hotkey_Action.Toggle_OBS)
+	}
 	if rl.IsKeyPressed(.ESCAPE) {
 		append(&h.fired, Hotkey_Action.Quit)
 	}
 }
 
-HOTKEY_HELP := [10]string{
+HOTKEY_HELP := [12]string{
 	"F1  toggle HUD",
-	"F2  mouse tracking",
-	"F3  idle tracking",
-	"F4  demo animation",
+	"F2–F4  mouse / idle / demo track",
+	"F5  model editor",
+	"F9  OBS capture mode",
 	"1-4 expressions  0 clear",
 	"Space mouth  S smile  W brows",
 	"Q/E roll  B blink",
 	"P physics  Ctrl+C chroma",
-	"Ctrl+R reset  Esc quit",
+	"Ctrl+R reset  Ctrl+S save (editor)",
+	"Esc quit",
 	"Move mouse = look around",
+	"OBS: Window Capture + Chroma Key green",
 }
