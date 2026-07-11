@@ -1,12 +1,30 @@
-# Personal face distillation — Colab / local
+# Personal face distillation — local + Colab
 # Install: pip install -r requirements.txt
+#
+# Notes (2026-07):
+# - Latest OpenCV wheels on PyPI: 5.0.0.93 (OpenCV 5)
+# - MediaPipe depends on opencv-contrib-python (NOT headless).
+#   Install only ONE of: opencv-python | opencv-contrib-python |
+#   opencv-python-headless | opencv-contrib-python-headless
+# - Colab already ships torch/torchvision/numpy; still listed for local use.
+# - Google MediaPipe Python setup: pip install mediapipe
+#   https://developers.google.com/edge/mediapipe/solutions/setup_python
 
+# --- Core (local training machine) ---
 torch>=2.1.0
 torchvision>=0.16.0
-numpy>=1.24
-opencv-python-headless>=4.8
-mediapipe>=0.10.9
-onnx>=1.15
-onnxruntime>=1.16
-tqdm>=4.66
-Pillow>=10.0
+numpy>=1.26.0
+
+# OpenCV 5 — contrib package matches MediaPipe's declared dependency
+opencv-contrib-python>=5.0.0.93
+
+# Teacher labels (Google AI Edge / MediaPipe)
+# Latest on PyPI: 0.10.35 (2026-04). Docs: unpinned `pip install mediapipe`
+mediapipe>=0.10.35
+
+# Export / runtime check
+onnx>=1.16.0
+onnxruntime>=1.17.0
+
+tqdm>=4.66.0
+Pillow>=10.0.0

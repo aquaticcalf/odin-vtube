@@ -41,6 +41,18 @@ Repo is expected at: **https://github.com/aquaticcalf/odin-vtube**
 3. **Runtime → GPU**
 4. Run all cells — notebook clones the repo automatically
 
+## Dependencies (versions)
+
+| Package | Our pin | Latest PyPI (approx 2026-07) | Notes |
+|---------|---------|------------------------------|--------|
+| OpenCV | `opencv-contrib-python>=5.0.0.93` | **5.0.0.93** | OpenCV 5. Use **contrib**, not headless — MediaPipe depends on it |
+| mediapipe | `>=0.10.35` | **0.10.35** | Google docs: `pip install mediapipe` (unpinned) |
+| onnx | `>=1.16` | **1.22.0** | export |
+| onnxruntime | `>=1.17` | **1.27.0** | CPU check of ONNX |
+| torch | `>=2.1` | Colab ships current | Don’t reinstall on Colab unless needed |
+
+**Colab tip:** do not install `opencv-python-headless` alongside MediaPipe — both provide `cv2` and will conflict.
+
 ## Local (optional)
 
 ```bash
@@ -49,6 +61,7 @@ python scripts/label_teacher.py --videos path/to/*.mp4 --out ./dataset
 python scripts/train_student.py --data ./dataset --out ./runs/run1
 python scripts/export_onnx.py --ckpt ./runs/run1/best.pt --out ./runs/run1/personal_face_student.onnx
 ```
+
 
 ## Tips
 
