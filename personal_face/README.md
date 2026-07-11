@@ -54,12 +54,41 @@ These match the parameter names used by the OdinVTube runtime.
 
 ---
 
+## Face Recording Coach (no OBS)
+
+Users should not need OBS. Use the built-in coach app:
+
+```text
+personal_face/recorder/index.html
+```
+
+On Windows, double-click:
+
+```text
+personal_face/recorder/open_recorder.bat
+```
+
+What it does:
+
+- Asks for **camera** permission (stays on your computer)
+- Shows **exactly** what to do, with a **countdown** per step
+- **Records** the whole session
+- Lets you **download** one video file when done
+
+Then upload that file to Google Drive and train in Colab. No OBS setup, no scene worry.
+
+**Browser:** Chrome or Edge recommended. Recording is usually **WebM** (training accepts it).  
+**Privacy:** nothing is uploaded by the coach; download is local only.
+
+---
+
 ## Google Colab (recommended)
 
 Repo: [github.com/aquaticcalf/odin-vtube](https://github.com/aquaticcalf/odin-vtube)
 
-1. Upload face videos to Google Drive:  
-   `MyDrive/odin_face/videos/*.mp4`
+1. Record with the **Face Recording Coach** (above), or any webcam app  
+2. Upload face videos to Google Drive:  
+   `MyDrive/odin_face/videos/*.mp4` or `.webm`
 2. Open  
    `personal_face/notebooks/Personal_Face_Train_Colab.ipynb`  
    from GitHub in Colab

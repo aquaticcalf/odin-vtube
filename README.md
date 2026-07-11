@@ -195,6 +195,16 @@ Film **yourself** doing all of these (see the full table in `personal_face/READM
 
 Use normal desk lighting and the same glasses setup you will use live.
 
+### Face Recording Coach (no OBS)
+
+Users do not need OBS. Open the guided recorder:
+
+- Folder: [`personal_face/recorder/`](personal_face/recorder/)
+- Windows: double-click `personal_face/recorder/open_recorder.bat`
+- Or open `personal_face/recorder/index.html` in Chrome / Edge
+
+It shows each step on screen, records your webcam, and lets you download the file for Drive / Colab.
+
 The Colab notebook clones this repo, labels video with MediaPipe, trains a compact student network, and exports ONNX to Google Drive.
 
 ---

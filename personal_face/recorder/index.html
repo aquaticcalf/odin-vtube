@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OdinVTube — Face Recording Coach</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div>
+        <h1>Face Recording Coach</h1>
+        <p class="sub">Follow the on-screen steps. No OBS. Your video stays on this computer.</p>
+      </div>
+      <div class="badges">
+        <span id="recBadge" class="badge idle">Idle</span>
+        <span id="timeBadge" class="badge">00:00</span>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="panel preview-panel">
+        <div class="video-wrap">
+          <video id="preview" autoplay playsinline muted></video>
+          <div id="recDot" class="rec-dot hidden" aria-hidden="true"></div>
+          <div id="overlayHint" class="overlay-hint">Allow camera access to begin</div>
+        </div>
+        <div class="preview-meta">
+          <span id="faceHint">Keep your face roughly centered in the frame.</span>
+        </div>
+      </section>
+
+      <section class="panel coach-panel">
+        <div class="step-progress">
+          <div class="bar"><div id="barFill" class="fill"></div></div>
+          <span id="stepCounter">Step 0 / 0</span>
+        </div>
+
+        <h2 id="stepTitle">Getting ready</h2>
+        <p id="stepDesc" class="step-desc">
+          Press <strong>Start camera</strong>, then <strong>Start session</strong>.
+          The app will tell you exactly what to do and for how long.
+        </p>
+
+        <div class="timer-block">
+          <div id="countdown" class="countdown">—</div>
+          <div id="stepDuration" class="muted">—</div>
+        </div>
+
+        <ol id="checklist" class="checklist"></ol>
+
+        <div class="actions">
+          <button type="button" id="btnCamera" class="btn primary">Start camera</button>
+          <button type="button" id="btnSession" class="btn accent" disabled>Start session</button>
+          <button type="button" id="btnSkip" class="btn" disabled>Skip step</button>
+          <button type="button" id="btnStop" class="btn danger" disabled>Stop &amp; save</button>
+        </div>
+
+        <p class="legal muted">
+          Recording never leaves your machine unless you upload the file yourself
+          (e.g. to Google Drive for Colab training).
+        </p>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <span>OdinVTube personal face data · ~20–30 min recommended</span>
+      <a href="../README.md">Training docs</a>
+    </footer>
+  </div>
+
+  <div id="doneModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <h2>Session complete</h2>
+      <p id="doneText">Your recording is ready.</p>
+      <div class="actions">
+        <button type="button" id="btnDownload" class="btn accent">Download video</button>
+        <button type="button" id="btnCloseModal" class="btn">Close</button>
+      </div>
+      <p class="muted small">
+        Upload the file to <code>Google Drive/odin_face/videos/</code> then run the Colab notebook.
+      </p>
+    </div>
+  </div>
+
+  <script src="steps.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
