@@ -163,12 +163,39 @@ Example parameter inject:
 
 ## Personal face training
 
-Train a small face model on **your own** footage (optional):
+Train a small face model on **your own** footage (optional).
 
-- Docs: [`personal_face/README.md`](personal_face/README.md)
-- Colab notebook: [`personal_face/notebooks/Personal_Face_Train_Colab.ipynb`](personal_face/notebooks/Personal_Face_Train_Colab.ipynb)
+- Full guide (including **exact video checklist and durations**):  
+  [`personal_face/README.md`](personal_face/README.md)
+- Colab notebook:  
+  [`personal_face/notebooks/Personal_Face_Train_Colab.ipynb`](personal_face/notebooks/Personal_Face_Train_Colab.ipynb)
 
-The notebook clones this repo, labels video with MediaPipe, trains a compact student network, and exports ONNX to Google Drive.
+### Video you need (summary)
+
+| | |
+|--|--|
+| **Length** | **20–30 minutes** recommended (15 min minimum, 40 min excellent) |
+| **Format** | MP4 H.264, 720p or 1080p @ 30 fps |
+| **Where** | `Google Drive/odin_face/videos/*.mp4` |
+
+Film **yourself** doing all of these (see the full table in `personal_face/README.md`):
+
+1. Neutral face (~1–2 min)  
+2. **Talking** while looking at cam (~5–8 min) — most important  
+3. Mouth open/close (~1–2 min)  
+4. Smile / laugh (~1–2 min)  
+5. Blinks + hold eyes closed (~1–2 min)  
+6. Look left / right (~1–2 min)  
+7. Look up / down (~1–2 min)  
+8. Head tilt / roll both ways (~1–2 min)  
+9. Talk while turning head (~2–3 min)  
+10. Raise brows / slight frown (~1–2 min)  
+11. Lean closer / farther (~1 min)  
+12. Optional: ¾ side views, dimmer lighting  
+
+Use normal desk lighting and the same glasses setup you will use live.
+
+The Colab notebook clones this repo, labels video with MediaPipe, trains a compact student network, and exports ONNX to Google Drive.
 
 ---
 

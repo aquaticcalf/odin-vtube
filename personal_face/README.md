@@ -74,21 +74,78 @@ The notebook will:
 - label, train, and export ONNX to  
   `MyDrive/odin_face/runs/run1/`
 
-### Recording tips
+## What video to record (exact checklist)
 
-- About **15–40 minutes** total is a good start  
-- Talk, smile, blink, look around, tilt your head, raise brows  
-- Use your normal desk lighting and camera distance  
-- MP4 (H.264), 720p or 1080p at 30 fps is fine  
+You only need **your face**. One continuous recording is fine, or several clips that add up to the same total.
 
-For a quick smoke test in the notebook config cell:
+### Target length
+
+| Goal | Total length |
+|------|----------------|
+| Minimum usable | **~15 minutes** |
+| Recommended | **20–30 minutes** |
+| Excellent | **30–40 minutes** |
+
+Shorter than ~10 minutes will train, but tracking will look weaker.
+
+### Camera & file settings
+
+| Setting | Do this |
+|---------|---------|
+| Format | **MP4**, H.264 |
+| Resolution | **720p or 1080p** |
+| Frame rate | **30 fps** |
+| Framing | Face fills about **40–70%** of the frame; shoulders OK |
+| Distance | Normal desk / streaming distance (the one you will use later) |
+| Lighting | **Your normal room/stream lights** — most important |
+| Glasses | If you always wear them, film **with** glasses; if mixed, do **both** (~half each) |
+| Upload path | `Google Drive/odin_face/videos/*.mp4` |
+
+### Exact face actions (do all of these)
+
+Work through the list slowly. Hold each pose a few seconds, then move smoothly. You can loop the list more than once.
+
+| # | What to do | How long (about) | Why |
+|---|------------|------------------|-----|
+| 1 | **Neutral face**, look at camera | 1–2 min | Baseline |
+| 2 | **Talk naturally** (read a script, chat, count 1–100) | **5–8 min** | Mouth while speaking (most important) |
+| 3 | **Mouth open** wide, then closed — repeat | 1–2 min | Mouth open amount |
+| 4 | **Smile** small → big → off; also laugh a bit | 1–2 min | Smile / cheeks |
+| 5 | **Blink** a lot; hold eyes closed 2–3 s a few times | 1–2 min | Eye open / blink |
+| 6 | Look **left**, then **right** (slow, then a bit faster) | 1–2 min | Head yaw |
+| 7 | Look **up**, then **down** | 1–2 min | Head pitch |
+| 8 | **Tilt / roll** head left and right (ear toward shoulder) | 1–2 min | Head roll |
+| 9 | Combine: turn head **while talking** | 2–3 min | Real use case |
+| 10 | **Raise eyebrows**, then lower; slight frown | 1–2 min | Brows |
+| 11 | Move **closer** and **farther** once or twice | ~1 min | Scale / distance |
+| 12 | Optional: **¾ side** view each side (not full back of head) | 1–2 min | Wider angles |
+| 13 | Optional: **dimmer light** or side light (short second clip) | 2–5 min | Robustness if you stream dark |
+
+**Rough total if you do the table once: ~20–30 minutes.**
+
+### Good habits while filming
+
+- Stay roughly centered; don’t leave the frame  
+- Move smoothly, not only snap poses  
+- Include **talking** — silent faces alone are not enough  
+- Avoid covering your mouth with your hand for long stretches  
+- Avoid only one expression for the whole video  
+
+### Smoke test vs full train
+
+In the Colab config cell:
 
 ```python
-MAX_FRAMES = 2000
+MAX_FRAMES = 2000   # smoke test (~subset of frames)
 EPOCHS = 10
 ```
 
-Full run: `MAX_FRAMES = 0`, `EPOCHS = 40`.
+Full training after you have the full checklist video:
+
+```python
+MAX_FRAMES = 0      # use all labeled frames
+EPOCHS = 40
+```
 
 ---
 
