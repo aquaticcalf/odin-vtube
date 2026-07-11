@@ -39,6 +39,7 @@ It is intentionally minimal. Full Live2D Cubism mesh support is not included yet
 | Expressions and hotkeys | Supported |
 | OBS mode (F9, borderless + green key) | Supported — see [`docs/OBS.md`](docs/OBS.md) |
 | In-app model editor (F5) | Supported — free `.ovt.json` format |
+| Krita / Paint PNG import | Supported — drag-drop + folder (see [`docs/MODELING.md`](docs/MODELING.md)) |
 | OBS-friendly chroma background | Supported |
 | Localhost plugin API | Supported |
 | Personal face ONNX training (Colab) | Supported (see `personal_face/`) |
@@ -119,16 +120,23 @@ No Live2D Cubism SDK and **no paid license** for the format itself.
 ### Model editor (F5)
 
 1. Run the app, press **F5**  
-2. **Add part** buttons (head, eyes, mouth, hair, …)  
-3. **Drag** the blue handle or use arrow keys  
-4. **Bind head / body** motion presets  
-5. **Ctrl+S** or **Save model**  
-6. **F5** again to return to stream view  
+2. **Drop PNGs** from Krita / Paint (or use **Import folder**)  
+3. Or **Add part** for procedural shapes (head, eyes, mouth, hair, …)  
+4. **Drag** the blue handle or use arrow keys  
+5. **Bind head / body** motion presets  
+6. **Ctrl+S** or **Save model**  
+7. **F5** again to return to stream view  
+
+**Ideal art path:** draw layers in **Krita** → export each as PNG → drop into F5.  
+**Simple path:** one full character PNG from **MS Paint** → drop as billboard.
+
+Full guide: [`docs/MODELING.md`](docs/MODELING.md).
 
 ### Format sketch
 
 - Procedural layer kinds: `head`, `body`, `hair`, `eye_l`, `eye_r`, `mouth`, `brow_l`, `brow_r`, `blush`
-- Optional `image` for a full-character PNG
+- Optional `image` for a full-character PNG (billboard)
+- Layer textures live under `textures/` next to `avatar.json`
 - Layers bind to params like `ParamAngleX`, `ParamMouthOpenY`, etc.
 
 ## OBS (out of the box)

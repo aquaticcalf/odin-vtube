@@ -1,6 +1,7 @@
 package main
 
 import "core:fmt"
+import "core:path/filepath"
 import "core:strings"
 import rl "vendor:raylib"
 
@@ -48,7 +49,7 @@ editor_set_status :: proc(e: ^Model_Editor, msg: string) {
 editor_toggle :: proc(e: ^Model_Editor) {
 	e.active = !e.active
 	if e.active {
-		editor_set_status(e, "Model editor — drag layers, add parts, Ctrl+S save")
+		editor_set_status(e, "Drop PNGs from Krita/Paint · drag layers · Ctrl+S save")
 	}
 }
 
@@ -203,6 +204,9 @@ editor_update_draw :: proc(
 		}
 	}
 
+	// Drag-drop PNGs from Explorer / Krita export folder
+	editor_handle_file_drops(e, a)
+
 	// Save
 	if rl.IsKeyDown(.LEFT_CONTROL) && rl.IsKeyPressed(.S) {
 		if save_avatar(a^, e.save_path) {
@@ -220,13 +224,43 @@ editor_update_draw :: proc(
 	y: f32 = 12
 	ui_label(px + 12, y, "Model Editor", 22, rl.Color{140, 200, 255, 255})
 	y += 28
-	ui_label(px + 12, y, "Free format — no paid SDK", 14, rl.GRAY)
+	ui_label(px + 12, y, "Drop PNG from Krita / Paint", 14, rl.Color{120, 220, 160, 255})
+	y += 18
+	ui_label(px + 12, y, "Shift+drop = replace selected", 13, rl.GRAY)
+	y += 18
+	ui_label(px + 12, y, strings.clone_to_cstring(fmt.tprintf("File: %s", e.save_path), context.temp_allocator), 13, rl.LIGHTGRAY)
 	y += 22
-	ui_label(px + 12, y, strings.clone_to_cstring(fmt.tprintf("File: %s", e.save_path), context.temp_allocator), 14, rl.LIGHTGRAY)
-	y += 26
+
+	// Import helpers
+	if ui_btn({px + 10, y, 145, 28}, "Import folder") {
+		// loads textures/ next to model, or assets/models/import
+		model_dir := filepath.dir(e.save_path)
+		candidates := [2]string{}
+		c0, _ := filepath.join({model_dir, "textures"})
+		c1, _ := filepath.join({"assets", "models", "import"})
+		defer { delete(c0); delete(c1) }
+		n := 0
+		n += import_folder_pngs(a, c0, e.save_path)
+		n += import_folder_pngs(a, c1, e.save_path)
+		editor_set_status(e, fmt.tprintf("Imported %d PNG(s) from textures/ + import/", n))
+		if len(a.def.layers) > 0 do e.selected = len(a.def.layers) - 1
+	}
+	if ui_btn({px + 165, y, 145, 28}, "Clear to empty") {
+		avatar_destroy(a)
+		a.def.name = av_str("New Model")
+		a.def.pos_x = 0
+		a.def.pos_y = 40
+		a.def.scale = 1
+		a.def.image = ""
+		a.def.layers = make([dynamic]Avatar_Layer)
+		a.loaded = true
+		e.selected = -1
+		editor_set_status(e, "Empty model — drop PNGs or Add part")
+	}
+	y += 36
 
 	// Add parts
-	ui_label(px + 12, y, "Add part", 16, rl.SKYBLUE)
+	ui_label(px + 12, y, "Add procedural part", 16, rl.SKYBLUE)
 	y += 22
 	kinds := []string{"head", "body", "hair", "eye_l", "eye_r", "mouth", "brow_l", "brow_r", "blush"}
 	bx := px + 10
@@ -383,5 +417,6 @@ editor_update_draw :: proc(
 	}
 
 	// Title banner on canvas
-	rl.DrawText("EDIT MODE — drag the blue handle · F5 back to stream", 12, 10, 18, rl.Color{180, 220, 255, 230})
+	rl.DrawText("EDIT MODE — drop PNG art · drag handles · F5 stream view", 12, 10, 18, rl.Color{180, 220, 255, 230})
+	rl.DrawText("Ideal: Krita layers export as head.png eye_l.png mouth.png …", 12, 32, 15, rl.Color{160, 180, 200, 200})
 }

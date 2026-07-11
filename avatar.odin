@@ -49,6 +49,8 @@ Avatar_Def :: struct {
 	pos_x:  f32,
 	pos_y:  f32,
 	scale:  f32,
+	// optional full-body PNG (Krita/Paint single canvas export)
+	image:  string,
 }
 
 Avatar :: struct {
@@ -159,6 +161,7 @@ load_avatar :: proc(path: string) -> Avatar {
 	a.def.pos_x = file.pos_x
 	a.def.pos_y = file.pos_y
 	a.def.scale = file.scale != 0 ? file.scale : 1
+	a.def.image = av_str(file.image)
 	a.def.layers = make([dynamic]Avatar_Layer)
 
 	dir := filepath.dir(path)
@@ -255,7 +258,9 @@ avatar_destroy :: proc(a: ^Avatar) {
 	}
 	delete(a.def.layers)
 	delete(a.def.name)
+	delete(a.def.image)
 	a.def.name = ""
+	a.def.image = ""
 	a.loaded = false
 }
 
@@ -266,7 +271,7 @@ save_avatar :: proc(a: Avatar, path: string) -> bool {
 	file.pos_x = a.def.pos_x
 	file.pos_y = a.def.pos_y
 	file.scale = a.def.scale
-	file.image = ""
+	file.image = a.def.image
 	file.layers = make([]Avatar_Layer_File, len(a.def.layers))
 	defer delete(file.layers)
 
